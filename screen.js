@@ -185,6 +185,30 @@ class Screen{
             console.log(`Rendered text data '${chars}' at ${x} x ${y}` )
         }
      }
+    
+     //move cursor method
+     moveCursor(x, y){
+        //ensure screen is setup
+        if(!this.isSetup){
+            console.log('screen is not setup!');
+            return;
+        }
+        //validate the inputs
+        if(x<0 || x > this.screenWidth || y < 0 || y > this.screenHeight){
+            console.log('Provided position of the cursor is out of bounds')
+            return;
+        }
+          
+        //change the position of the cursor
+        this.screenHeight = y;
+        this.screenWidth = x;
+
+        //feedback message
+        console.log(
+            `Cursor moved to position ${x}x${y}`
+        )
+        
+     }
 }
 
 export default Screen;
