@@ -209,6 +209,35 @@ class Screen{
         )
         
      }
+
+     //draw at cursor method
+     drawAtCursor(char, color= 'green'){
+        //ensure screen is setup
+        if(!this.isSetup){
+            console.log('screen is not setup!');
+            return;
+        }
+        // validate character
+       if(!char || char.length !== 1 || typeof char !== 'string' || char.charCodeAt(0) > 127){
+        console.log('invalid character input');
+        return;
+       }
+
+       //get the current position of the cursor
+
+       const {x, y} = this.cursor;
+
+       // validate cursor position as a saftey check 
+
+       if (x < 0 || x > this.screenWidth || y < 0 || y > this.screenHeight) {
+        console.log("Cursor is out of bounds");
+        return;
+      }
+
+      //draw the character in the grid
+      this.grid[x][y]= chalk[color] ? chalk[color](char): chalk.green(char);
+      
+     }
 }
 
 export default Screen;
