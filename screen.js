@@ -143,6 +143,48 @@ class Screen{
         }
 
      }
+
+     // render text method 
+     renderText(x, y , color= 'green', chars){
+
+        //ensure screen is setup
+        if(!this.isSetup){
+            console.log('screen is not setup!');
+            return;
+        }
+        //validate coordinates
+
+        if (x < 0 || x > this.screenWidth || y< 0 || y > this.screenHeight){
+            console.log('Provided starting coordinates are out of bounds');
+            return;
+        }
+
+        //validate characters
+        for(const char of chars){
+            if (char.charCodeAt(0) > 127){
+                console.log('Invalid text');
+                return;
+            }
+        }
+
+        //Render text horizontally
+        //loop through the text
+        for (let i=0; i< chars.length; i++){
+            const positionOfX = x + i;
+
+            //if chars exceeds the grid stop rendering
+
+            if(positionOfX >= this.screenWidth) break;
+
+            //access starting grid cell at y and currentX and start rendering the text
+
+            this.grid[y][positionOfX]= chalk[color] ? chalk[color](chars[i]) : chalk.green(text[i]);
+
+            //feedback message 
+
+            console.log(`Rendered text data '${chars}' at ${x} x ${y}` )
+        }
+     }
 }
 
 export default Screen;
