@@ -85,16 +85,64 @@ class Screen{
         }
         
         //select color from chalk library. Apply default color green if no color is selected or invalid color
-        const characterColor= chalk[color] || chalk.green
+        const characterColor= chalk[color] || chalk.green;
 
         //apply the selected color to the char and store it in a grid
-        this.grid[x][y] = characterColor(color)
+        this.grid[x][y] = characterColor(color);
     
       //feedback message 
 
       console.log(`Drew character ${char} at coordinates ${x}x${y}`)
     
    }
+
+     //draw Line method
+     draw(x1, y1, x2, y2, color, char){
+        //ensures screen has been setup
+        if(!this.isSetup){
+            console.log('screen has not been setup');
+            return;
+        }
+        //validation of the coordinates 
+        if(x1 <0 || x1 < this.screenWidth || x2< 0|| x2 < this.screenWidth){
+            console.log('Width coordinates is out of bounds');
+            return;
+        }
+        if(y1 <0 || y1 < this.screenHeight || y2< 0|| y2 < this.screenHeight){
+            console.log('height coordinates is out of bounds');
+            return;
+        }
+
+        //validation of the character
+        if(char !== 1 || !char || typeof char !== 'string'){
+            console.log('Invalid character, provide a single string character');
+            return;
+        }
+        //Bresnhams Algorithm for drawing lines on a grid 
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2-y1);
+        const sx = x1 > x2 ? -1  : 1;
+        const sy = y1 > y2 ? -1  : 1;
+        let err = dx - dy
+
+        while(true){
+            this.draw(x1, y1, char, color);
+
+            if (x1=== x2 && y1 === y2) break;
+
+            const e2 = 2 * err;
+
+            if(e2 > -dy){
+                err -= dy;
+                x1 += sx;
+            }
+            if(e2  < dx){
+                err += dx;
+                y1 += sy;
+            }
+        }
+
+     }
 }
 
 export default Screen;
