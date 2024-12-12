@@ -1,4 +1,6 @@
-class screen{
+import chalk from "chalk";
+
+class Screen{
     constructor(){
         //ensures screen is initialized before other commands are send
         this.isSetup= false;
@@ -7,7 +9,7 @@ class screen{
         this.screenWidth = 0;
         this.screenHeight =0;
 
-        //grid stores the screen's content, initialized to 0 as screen has not been setup yet
+        //grid stores the screen's content, initialized to empty array as screen has not been setup yet
         this.grid = [];
 
         //Tracks the position of the cursor,initialized at (0,0)
@@ -56,5 +58,43 @@ class screen{
           
         
     }
+    
+    //draw character method
+
+    draw(x, y, color, char = 'green'){
+         //ensure screen has been setup 
+        if(!this.isSetup){
+            console.log('screen has not been setup!')
+            return;
+        }
+
+        //validate coordinates to ensure they dont go out of bounds in relation to the setup screen
+        if(x < 0 || x > this.screenWidth){
+            console.log('Width coordinate is out of bounds!')
+            return;
+        }
+        if(y < 0 || y > this.screenHeight){
+            console.log('Height coordinate is out of bounds!')
+            return;
+        }
+
+        //validation of the character
+        if(char !== 1 || !char || typeof char !== 'string'){
+            console.log('Invalid character, provide a single string character');
+            return;
+        }
+        
+        //select color from chalk library. Apply default color green if no color is selected or invalid color
+        const characterColor= chalk[color] || chalk.green
+
+        //apply the selected color to the char and store it in a grid
+        this.grid[x][y] = characterColor(color)
+    
+      //feedback message 
+
+      console.log(`Drew character ${char} at coordinates ${x}x${y}`)
+    
+   }
 }
 
+export default Screen;
