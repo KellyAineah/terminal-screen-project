@@ -1,243 +1,325 @@
-import chalk from "chalk";
+class Screen {
+    constructor() {
+        //ensures that the screen on which the command interpreter operates is initialized before the other commands are sent.
+        this.initializeScreen = false;
 
-class Screen{
-    constructor(){
-        //ensures screen is initialized before other commands are send
-        this.isSetup= false;
-
-        //width and height represent the screens's dimensions, set to 0 as default to show that the screen has not been configured
+        // screenWidth and screenheight represent the screen's dimensions,default to 0 to show that the screen has not been set yet
         this.screenWidth = 0;
-        this.screenHeight =0;
+        this.screenHeight = 0;
 
-        //grid stores the screen's content, initialized to empty array as screen has not been setup yet
+        // grid initialized as an empty array because the screen hasn’t been set up yet.
+        //grid stores content of the screen
         this.grid = [];
 
-        //Tracks the position of the cursor,initialized at (0,0)
-        this.cursor={x:0, y:0};
+        // stores coordinates of the cursor, initialized at (0,0)
+        this.cursor = { x: 0, y: 0 };
 
-        //set default color mode to monochrome
-        this.colorMode = 0x00;
+        // Set default color 
+        this.colorMode = "blue";
     }
 
-    //screen setup method 
-
-    setup(screenWidth, screenHeight, colorMode=0x00){
-
-        //validation of screen dimensions 
-        if(screenWidth < 0 || screenHeight < 0){
-            console.log("Input can not be a negative integer")
+    // Screen setup method
+    setup(screenWidth, screenHeight, colorMode = "blue") {
+        // Validate screen dimensions
+        if (screenWidth <= 0 || screenHeight <= 0) {
+            console.log("Input should be a positive number");
             return;
         }
-        if(isNaN(screenWidth) || isNaN(screenHeight)){
-            console.log("width and height must be numbers")
+        if (isNaN(screenWidth) || isNaN(screenHeight)) {
+            console.log("screen width and screen height must be numbers");
             return;
         }
 
-        //store inputs provided by the screen setup method
-
+        // Store inputs provided by the screen setup method
         this.screenWidth = screenWidth;
-        this.screenHeight= screenHeight;
+        this.screenHeight = screenHeight;
         this.colorMode = colorMode;
 
-        //create a 2D array basing on screenWidth and screenHeight
+        // Create a 2D array based on screenWidth and screenHeight and cells initialized as ""
+        for(let i =0; i < screenHeight; i++){
+           let row = [];
+           for(let j=0; j< screenWidth; j++){
+            row.push(' ')
+           }
+           this.grid.push(row);
+        }
 
-        this.grid = Array.from({ length: screenWidth }, () =>
-            Array.from({ length: screenHeight }, () => " ")
-          );
+        // Set up screen
+        this.initializeScreen = true;
 
-
-          //set up screen
-
-          this.isSetup = true;
-
-          //output message
-
-          console.log(
-            `Screen has successfully been initialized with dimensions ${screenWidth}x${screenHeight} and color ${colorMode} `
-          )
-          
-        
+        // feedback message
+        console.log(
+            `Screen initialized with dimensions: ${screenWidth}x${screenHeight}`
+        );
     }
-    
-    //draw character method
 
-    draw(x, y, color, char = 'green'){
-         //ensure screen has been setup 
-        if(!this.isSetup){
-            console.log('screen has not been setup!')
-            return;
-        }
+    // Draw character method
+    draw(x, y, color = "red", char = "Z") {
 
-        //validate coordinates to ensure they dont go out of bounds in relation to the setup screen
-        if(x < 0 || x > this.screenWidth){
-            console.log('Width coordinate is out of bounds!')
-            return;
-        }
-        if(y < 0 || y > this.screenHeight){
-            console.log('Height coordinate is out of bounds!')
+        //validations 
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
             return;
         }
 
-        //validation of the character
-        if(char !== 1 || !char || typeof char !== 'string'){
-            console.log('Invalid character, provide a single string character');
-            return;
-        }
-        
-        //select color from chalk library. Apply default color green if no color is selected or invalid color
-        const characterColor= chalk[color] || chalk.green;
-
-        //apply the selected color to the char and store it in a grid
-        this.grid[x][y] = characterColor(color);
-    
-      //feedback message 
-
-      console.log(`Drew character ${char} at coordinates ${x}x${y}`)
-    
-   }
-
-     //draw Line method
-     draw(x1, y1, x2, y2, color, char){
-        //ensures screen has been setup
-        if(!this.isSetup){
-            console.log('screen has not been setup');
-            return;
-        }
-        //validation of the coordinates 
-        if(x1 <0 || x1 < this.screenWidth || x2< 0|| x2 < this.screenWidth){
-            console.log('Width coordinates is out of bounds');
-            return;
-        }
-        if(y1 <0 || y1 < this.screenHeight || y2< 0|| y2 < this.screenHeight){
-            console.log('height coordinates is out of bounds');
+        if (x < 0 || x >= this.screenWidth || y < 0 || y >= this.screenHeight) {
+            console.log("Coordinates out of bounds.");
             return;
         }
 
-        //validation of the character
-        if(char !== 1 || !char || typeof char !== 'string'){
-            console.log('Invalid character, provide a single string character');
+        if (!char || typeof char !== "string" || char.length !== 1) {
+            console.log("Provide a valid character.");
             return;
         }
-        //Bresnhams Algorithm for drawing lines on a grid 
+
+        this.grid[y][x] = { color, char };
+        //feedback message
+        console.log(`Drew character '${char}' at coordinates (${x}, ${y}).`);
+    }
+
+    // Draw line method
+    drawLine(x1, y1, x2, y2, color = "white", char = "Z") {
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
+            return;
+        }
+      //Bresnham's Algorithm to calculate points between(x1-x2, y1-y2)
+
+        //determine vertical and horizontal distance between coordinates
         const dx = Math.abs(x2 - x1);
-        const dy = Math.abs(y2-y1);
-        const sx = x1 > x2 ? -1  : 1;
-        const sy = y1 > y2 ? -1  : 1;
-        let err = dx - dy
+        const dy = Math.abs(y2 - y1);
 
-        while(true){
-            this.draw(x1, y1, char, color);
+        //Determine the direction of line 
+        const sx = x1 < x2 ? 1 : -1;
+        const sy = y1 < y2 ? 1 : -1;
+        let err = dx - dy;
 
-            if (x1=== x2 && y1 === y2) break;
+        while (true) {
+            this.grid[y1][x1] = { color, char }; 
 
+            if (x1 === x2 && y1 === y2) break;
             const e2 = 2 * err;
-
-            if(e2 > -dy){
+            if (e2 > -dy) {
                 err -= dy;
                 x1 += sx;
             }
-            if(e2  < dx){
+            if (e2 < dx) {
                 err += dx;
                 y1 += sy;
             }
         }
+    }
 
-     }
-
-     // render text method 
-     renderText(x, y , color= 'green', chars){
-
-        //ensure screen is setup
-        if(!this.isSetup){
-            console.log('screen is not setup!');
-            return;
-        }
-        //validate coordinates
-
-        if (x < 0 || x > this.screenWidth || y< 0 || y > this.screenHeight){
-            console.log('Provided starting coordinates are out of bounds');
+    // Render text method
+    renderText(x, y, color = "white", text) {
+        //validations
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
             return;
         }
 
-        //validate characters
-        for(const char of chars){
-            if (char.charCodeAt(0) > 127){
-                console.log('Invalid text');
-                return;
+        if (x < 0 || x >= this.screenWidth || y < 0 || y >= this.screenHeight) {
+            console.log("Starting coordinates out of bounds.");
+            return;
+        }
+
+        for (let i = 0; i < text.length; i++) {
+            const positionOfX = x + i;
+            if (positionOfX >= this.screenWidth) {
+                console.log(`'${text}' exceeds screen width.`);
+                break;
+            }
+
+            this.grid[y][positionOfX] = { color, char: text[i] };
+        }
+
+        console.log(`Rendered text '${text}' at (${x}, ${y}).`);
+    }
+
+    // Move cursor method
+    moveCursor(x, y) {
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
+            return;
+        }
+
+        if (x < 0 || x >= this.screenWidth || y < 0 || y >= this.screenHeight) {
+            console.log("Provided position of the cursor is out of bounds");
+            return;
+        }
+
+        this.cursor = { x, y };
+
+        console.log(`Cursor moved to position (${x}, ${y}).`);
+    }
+
+    // Draw at cursor method
+    drawAtCursor(char, color = "white") {
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
+            return;
+        }
+
+        if (!char || char.length !== 1 || typeof char !== "string") {
+            console.log("Invalid character input.");
+            return;
+        }
+
+        const { x, y } = this.cursor;
+
+        if (x < 0 || x >= this.screenWidth || y < 0 || y >= this.screenHeight) {
+            console.log("Cursor is out of bounds");
+            return;
+        }
+
+        this.grid[y][x] = { color, char };
+    }
+
+    // Clear method
+    clear() {
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
+            return;
+        }
+
+        for(let i =0; i < screenHeight; i++){
+            let row = [];
+            for(let j=0; j< screenWidth; j++){
+             row.push(' ')
+            }
+            this.grid.push(row);
+         }
+
+        //console.log("Screen has been cleared.");
+    }
+
+    // Render method
+    render() {
+        if (!this.initializeScreen) {
+            console.log("Screen has not been initialized.");
+            return;
+        }
+
+        console.clear();
+          // set color for borders
+        const borderColor = "\x1b[34m"; 
+        // Reset color for normal text
+        const resetColor = "\x1b[0m";   
+
+        // ANSI color codes 
+        const colorCodes = {
+            
+            red: "\x1b[31m",
+            yellow: "\x1b[33m",
+            blue: "\x1b[34m",
+            white: "\x1b[37m",
+            cyan: "\x1b[36m",
+            magenta: "\x1b[35m",
+            green: "\x1b[32m"
+        };
+
+        // Print top row with column labels
+        let columnLabels = "   "; 
+        for (let col = 0; col < this.screenWidth; col++) {
+            columnLabels += ` ${col.toString().padStart(2)} `;
+        }
+        console.log(columnLabels);
+
+        // Print top border
+        console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
+
+        // Print grid with row labels and borders
+        for (let row = 0; row < this.screenHeight; row++) {
+            let rowContent = `${row.toString().padStart(2)} |`; 
+            for (let col = 0; col < this.screenWidth; col++) {
+                const cell = this.grid[row][col];
+                if (typeof cell === "object" && cell.color && cell.char) {
+                    const colorCode = colorCodes[cell.color.toLowerCase()] || resetColor;
+                    rowContent += ` ${colorCode}${cell.char}${resetColor} |`;
+                } else {
+                    rowContent += "   |";
+                }
+            }
+            console.log(rowContent);
+
+            // Print row divider
+            console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
+        }
+    }
+
+    // Parse Byte method
+    parsedataStream(dataStream) {
+        let i = 0;
+        while (i < dataStream.length) {
+            const command = dataStream[i++];
+            const length = dataStream[i++];
+
+            switch (command) {
+                // Screen setup
+                case 0x01: 
+                    const width = dataStream[i++];
+                    const height = dataStream[i++];
+                    const colorMode = dataStream[i++];
+                    const colorMap = { 0x00: "monochrome", 0x01: "16 colors", 0x02: "256 colors" };
+                    this.setup(width, height, colorMap[colorMode] || "monochrome");
+                    break;
+                // Draw character
+                case 0x02: 
+                    const x = dataStream[i++];
+                    const y = dataStream[i++];
+                    const colorIndex = dataStream[i++];
+                    const char = String.fromCharCode(dataStream[i++]);
+                    this.draw(x, y, colorIndex, char);
+                    break;
+                // Draw line
+                case 0x03: 
+                    const x1 = dataStream[i++];
+                    const y1 = dataStream[i++];
+                    const x2 = dataStream[i++];
+                    const y2 = dataStream[i++];
+                    const lineColor = dataStream[i++];
+                    const lineChar = String.fromCharCode(dataStream[i++]);
+                    this.drawLine(x1, y1, x2, y2, lineColor, lineChar);
+                    break;
+                // Render text
+                case 0x04: 
+                    const textX = dataStream[i++];
+                    const textY = dataStream[i++];
+                    const textColor = dataStream[i++];
+                    const textData = String.fromCharCode(...dataStream.slice(i, i + length - 3));
+                    i += length - 3;
+                    this.renderText(textX, textY, textColor, textData);
+                    break;
+                // Move cursor
+                case 0x05: 
+                    const cursorX = dataStream[i++];
+                    const cursorY = dataStream[i++];
+                    this.moveCursor(cursorX, cursorY);
+                    break;
+
+                // Draw at cursor
+                case 0x06: 
+                    const cursorChar = String.fromCharCode(dataStream[i++]);
+                    const cursorColor = dataStream[i++];
+                    this.drawAtCursor(cursorChar, cursorColor);
+                    break;
+
+                 // Clear screen   
+                case 0x07: 
+                    this.clear();
+                    break;
+
+                 // End of stream
+                case 0xFF: 
+                    console.log("End of byte stream.");
+                    return;
+
+                default:
+                    console.log(`Unknown command: ${command}`);
+                    return;
             }
         }
-
-        //Render text horizontally
-        //loop through the text
-        for (let i=0; i< chars.length; i++){
-            const positionOfX = x + i;
-
-            //if chars exceeds the grid stop rendering
-
-            if(positionOfX >= this.screenWidth) break;
-
-            //access starting grid cell at y and currentX and start rendering the text
-
-            this.grid[y][positionOfX]= chalk[color] ? chalk[color](chars[i]) : chalk.green(text[i]);
-
-            //feedback message 
-
-            console.log(`Rendered text data '${chars}' at ${x} x ${y}` )
-        }
-     }
-    
-     //move cursor method
-     moveCursor(x, y){
-        //ensure screen is setup
-        if(!this.isSetup){
-            console.log('screen is not setup!');
-            return;
-        }
-        //validate the inputs
-        if(x<0 || x > this.screenWidth || y < 0 || y > this.screenHeight){
-            console.log('Provided position of the cursor is out of bounds')
-            return;
-        }
-          
-        //change the position of the cursor
-        this.screenHeight = y;
-        this.screenWidth = x;
-
-        //feedback message
-        console.log(
-            `Cursor moved to position ${x}x${y}`
-        )
-        
-     }
-
-     //draw at cursor method
-     drawAtCursor(char, color= 'green'){
-        //ensure screen is setup
-        if(!this.isSetup){
-            console.log('screen is not setup!');
-            return;
-        }
-        // validate character
-       if(!char || char.length !== 1 || typeof char !== 'string' || char.charCodeAt(0) > 127){
-        console.log('invalid character input');
-        return;
-       }
-
-       //get the current position of the cursor
-
-       const {x, y} = this.cursor;
-
-       // validate cursor position as a saftey check 
-
-       if (x < 0 || x > this.screenWidth || y < 0 || y > this.screenHeight) {
-        console.log("Cursor is out of bounds");
-        return;
-      }
-
-      //draw the character in the grid
-      this.grid[x][y]= chalk[color] ? chalk[color](char): chalk.green(char);
-      
-     }
+    }
 }
 
 export default Screen;
