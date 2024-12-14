@@ -108,6 +108,7 @@ class Screen {
                 y1 += sy;
             }
         }
+        console.log(`Drew line`)
     }
 
     // Render text method

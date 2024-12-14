@@ -94,7 +94,7 @@ rl.on("line", (input) => {
       }
       case "parse": {
         console.log("Parsing predefined byte stream...");
-        const byteStream = [
+        const dataStream = [
           // Setup 16x16 screen, 16-color mode
             0x01, 0x03, 0x10, 0x10, 0x01, 
             // Draw character 'A' at (3,5) with color index 7
@@ -108,7 +108,7 @@ rl.on("line", (input) => {
             //End of stream
             0xFF, 0x00 
         ];
-        screen.parseByteStream(byteStream);
+        screen.parsedataStream(dataStream);
         console.log("Byte stream parsed and executed.");
         break;
       }
@@ -117,7 +117,7 @@ rl.on("line", (input) => {
         rl.close();
         break;
       default:
-        console.log("Unknown command! Type 'help' for the list of commands.");
+        console.log("Unknown command!.");
     }
   } catch (error) {
     console.error("Error:", error.message);
