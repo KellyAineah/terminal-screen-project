@@ -176,77 +176,79 @@ class Screen {
         this.grid[y][x] = { color, char };
     }
 
-    // Clear method
-    clear() {
+     // Clear method
+     clear() {
         if (!this.initializeScreen) {
             console.log("Screen has not been initialized.");
             return;
         }
 
-        for(let i =0; i < screenHeight; i++){
+        // Reset the grid to its initial state with empty strings
+        this.grid = [];
+        for (let i = 0; i < this.screenHeight; i++) {
             let row = [];
-            for(let j=0; j< screenWidth; j++){
-             row.push(' ')
+            for (let j = 0; j < this.screenWidth; j++) {
+                row.push(' '); 
             }
             this.grid.push(row);
-         }
-
-        //console.log("Screen has been cleared.");
-    }
-
-    // Render method
-    render() {
-        if (!this.initializeScreen) {
-            console.log("Screen has not been initialized.");
-            return;
         }
 
-        console.clear();
-          // set color for borders
-        const borderColor = "\x1b[34m"; 
-        // Reset color for normal text
-        const resetColor = "\x1b[0m";   
+        //console.log("Screen cleared.");
+    }
+// Render method
+render() {
+    if (!this.initializeScreen) {
+        console.log("Screen has not been initialized.");
+        return;
+    }
 
-        // ANSI color codes 
-        const colorCodes = {
-            
-            red: "\x1b[31m",
-            yellow: "\x1b[33m",
-            blue: "\x1b[34m",
-            white: "\x1b[37m",
-            cyan: "\x1b[36m",
-            magenta: "\x1b[35m",
-            green: "\x1b[32m"
-        };
+    console.clear();
+    // Set color for borders
+    const borderColor = "\x1b[34m";
+    // Reset color for normal text
+    const resetColor = "\x1b[0m";
 
-        // Print top row with column labels
-        let columnLabels = "   "; 
+    // ANSI color codes
+    const colorCodes = {
+        red: "\x1b[31m",
+        yellow: "\x1b[33m",
+        blue: "\x1b[34m",
+        white: "\x1b[37m",
+        cyan: "\x1b[36m",
+        magenta: "\x1b[35m",
+        green: "\x1b[32m"
+    };
+
+    // Print top row with column labels
+    let columnLabels = "   ";
+    for (let col = 0; col < this.screenWidth; col++) {
+        columnLabels += ` ${col.toString().padStart(2)} `;
+    }
+    console.log(columnLabels);
+
+    // Print top border
+    console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
+
+    // Print grid with row labels and borders
+    for (let row = 0; row < this.screenHeight; row++) {
+        let rowContent = `${row.toString().padStart(2)} |`;
         for (let col = 0; col < this.screenWidth; col++) {
-            columnLabels += ` ${col.toString().padStart(2)} `;
-        }
-        console.log(columnLabels);
-
-        // Print top border
-        console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
-
-        // Print grid with row labels and borders
-        for (let row = 0; row < this.screenHeight; row++) {
-            let rowContent = `${row.toString().padStart(2)} |`; 
-            for (let col = 0; col < this.screenWidth; col++) {
-                const cell = this.grid[row][col];
-                if (typeof cell === "object" && cell.color && cell.char) {
-                    const colorCode = colorCodes[cell.color.toLowerCase()] || resetColor;
-                    rowContent += ` ${colorCode}${cell.char}${resetColor} |`;
-                } else {
-                    rowContent += "   |";
-                }
+            const cell = this.grid[row][col];
+            // Safely handle cells
+            if (cell && typeof cell === "object" && cell.color && cell.char) {
+                const colorCode = colorCodes[cell.color.toLowerCase()] || resetColor;
+                rowContent += ` ${colorCode}${cell.char}${resetColor} |`;
+            } else {
+                rowContent += "   |"; 
             }
-            console.log(rowContent);
-
-            // Print row divider
-            console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
         }
+        console.log(rowContent);
+
+        // Print row divider
+        console.log(borderColor + "   +" + "---+".repeat(this.screenWidth) + resetColor);
     }
+}
+    
 
     // Parse Byte method
     parsedataStream(dataStream) {
